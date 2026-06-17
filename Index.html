@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AppForge AI</title>
+<script src="https://js.puter.com/v2/"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e8e8e8; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  #topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; background: #111; border-bottom: 1px solid #222;
+    flex-shrink: 0;
+  }
+  #topbar .logo { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; color: #fff; }
+  #topbar .logo span { color: #888; font-weight: 400; }
+
+  #prompt-row {
+    display: flex; gap: 8px; align-items: flex-end;
+    padding: 12px 16px; background: #111; border-bottom: 1px solid #222;
+    flex-shrink: 0;
+  }
+  #prompt-row textarea {
+    flex: 1; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px;
+    color: #e8e8e8; padding: 10px 12px; font-size: 13px; resize: none;
+    font-family: inherit; min-height: 40px; max-height: 120px; outline: none;
+    transition: border 0.15s;
+  }
+  #prompt-row textarea:focus { border-color: #444; }
+  #prompt-row textarea::placeholder { color: #555; }
+
+  #gen-btn {
+    background: #fff; color: #000; border: none; border-radius: 8px;
+    padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+    white-space: nowrap; transition: opacity 0.15s, transform 0.1s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  #gen-btn:hover { opacity: 0.9; }
+  #gen-btn:active { transform: scale(0.98); }
+  #gen-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  #workspace {
+    display: flex; flex: 1; overflow: hidden;
+  }
+
+  #editor-panel {
+    width: 50%; display: flex; flex-direction: column; border-right: 1px solid #222;
+  }
+  #preview-panel {
+    flex: 1; display: flex; flex-direction: column;
+  }
+
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 14px; background: #111; border-bottom: 1px solid #1e1e1e;
+    flex-shrink: 0;
+  }
+  .panel-title { font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.8px; }
+
+  .panel-actions { display: flex; gap: 6px; }
+  .panel-actions button {
+    background: #1e1e1e; border: 1px solid #2a2a2a; color: #aaa;
+    border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s; display: flex; align-items: center; gap: 4px;
+  }
+  .panel-actions button:hover { background: #2a2a2a; color: #fff; border-color: #3a3a3a; }
+
+  #code-editor {
+    flex: 1; background: #0e0e0e; padding: 14px; overflow: auto;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 12.5px; line-height: 1.65; color: #e8e8e8;
+    white-space: pre; outline: none; tab-size: 2;
+  }
+  #code-editor[contenteditable=true] { cursor: text; }
+
+  #preview-frame {
+    flex: 1; border: none; background: #fff; display: none;
+  }
+
+  #status-bar {
+    padding: 6px 16px; background: #0a0a0a; border-top: 1px solid #1a1a1a;
+    font-size: 11px; color: #555; flex-shrink: 0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  #status-msg { color: #555; }
+  #status-msg.active { color: #aaa; }
+  #status-msg.done { color: #5a9; }
+  #status-msg.err { color: #c55; }
+
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #333; gap: 8px;
+  }
+  .empty-state .big { font-size: 40px; }
+  .empty-state p { font-size: 13px; color: #444; }
+
+  #resizer {
+    width: 4px; background: #1a1a1a; cursor: col-resize; flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  #resizer:hover { background: #444; }
+
+  .spinner {
+    width: 14px; height: 14px; border: 2px solid #555; border-top-color: #000;
+    border-radius: 50%; animation: spin 0.6s linear infinite; display: none;
+  }
+  #gen-btn.loading .spinner { display: block; }
+  #gen-btn.loading .btn-text { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="logo">AppForge <span>AI</span></div>
+  <div style="font-size:11px; color:#555;">Powered by Puter · claude-opus-4-8</div>
+</div>
+
+<div id="prompt-row">
+  <textarea id="prompt" placeholder="Describe the app you want to build… e.g. 'A to-do list app with local storage and dark mode'" rows="2"></textarea>
+  <button id="gen-btn" onclick="generate()">
+    <div class="spinner"></div>
+    <span class="btn-text">⚡ Generate</span>
+  </button>
+</div>
+
+<div id="workspace">
+  <div id="editor-panel">
+    <div class="panel-header">
+      <span class="panel-title">Code</span>
+      <div class="panel-actions">
+        <button onclick="copyCode()">⎘ Copy</button>
+        <button onclick="runCode()">▶ Run</button>
+        <button onclick="downloadCode()">↓ Download</button>
+      </div>
+    </div>
+    <div id="code-editor" contenteditable="true" spellcheck="false" oninput="onCodeEdit()"></div>
+  </div>
+
+  <div id="resizer"></div>
+
+  <div id="preview-panel">
+    <div class="panel-header">
+      <span class="panel-title">Preview</span>
+      <div class="panel-actions">
+        <button onclick="refreshPreview()">↺ Refresh</button>
+        <button onclick="openInTab()">⤢ Open</button>
+      </div>
+    </div>
+    <div id="preview-wrap" style="flex:1; display:flex; position:relative; overflow:hidden;">
+      <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals"></iframe>
+      <div class="empty-state" id="empty-state">
+        <div class="big">✦</div>
+        <p>Your app preview appears here</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="status-bar">
+  <span id="status-msg">Ready</span>
+  <span id="char-count" style="color:#444;">0 chars</span>
+</div>
+
+<script>
+  let currentCode = '';
+  let isGenerating = false;
+
+  const editor = document.getElementById('code-editor');
+  const iframe = document.getElementById('preview-frame');
+  const emptyState = document.getElementById('empty-state');
+  const statusMsg = document.getElementById('status-msg');
+  const charCount = document.getElementById('char-count');
+  const genBtn = document.getElementById('gen-btn');
+  const promptEl = document.getElementById('prompt');
+
+  promptEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generate(); }
+  });
+
+  function setStatus(msg, type = '') {
+    statusMsg.textContent = msg;
+    statusMsg.className = type;
+  }
+
+  function setGenerating(v) {
+    isGenerating = v;
+    genBtn.disabled = v;
+    genBtn.classList.toggle('loading', v);
+  }
+
+  async function generate() {
+    const prompt = promptEl.value.trim();
+    if (!prompt || isGenerating) return;
+
+    setGenerating(true);
+    setStatus('Generating…', 'active');
+    editor.textContent = '';
+    currentCode = '';
+    hidePreview();
+
+    const systemPrompt = `You are an expert web developer. When given a description, output ONLY a complete, self-contained HTML file with no explanation, no markdown fences, no preamble. The file must:
+- Be a single HTML file with all CSS and JS embedded
+- Work without any external dependencies (or use CDN links if needed)
+- Be fully functional and visually polished
+- Use modern CSS and vanilla JS unless a framework is specifically requested
+- Handle edge cases gracefully
+Output raw HTML only. Start with <!DOCTYPE html>.`;
+
+    try {
+      const response = await puter.ai.chat(
+        [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }],
+        { model: 'claude-opus-4-8', stream: true }
+      );
+
+      let buffer = '';
+      let inCode = false;
+
+      for await (const part of response) {
+        const chunk = part?.text || part?.delta?.text || '';
+        if (!chunk) continue;
+
+        buffer += chunk;
+
+        if (!inCode && buffer.includes('<!DOCTYPE')) {
+          const idx = buffer.indexOf('<!DOCTYPE');
+          buffer = buffer.slice(idx);
+          inCode = true;
+        }
+
+        if (inCode) {
+          currentCode = buffer;
+          let display = currentCode.replace(/```\s*$/, '');
+          editor.textContent = display;
+          charCount.textContent = display.length + ' chars';
+          editor.scrollTop = editor.scrollHeight;
+        }
+      }
+
+      currentCode = currentCode.replace(/```[\s\S]*$/, '').trim();
+      editor.textContent = currentCode;
+      charCount.textContent = currentCode.length + ' chars';
+
+      runCode();
+      setStatus('Done ✓', 'done');
+    } catch (err) {
+      console.error(err);
+      setStatus('Error: ' + (err.message || 'Generation failed'), 'err');
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  function runCode() {
+    const code = editor.textContent || currentCode;
+    if (!code.trim()) return;
+    emptyState.style.display = 'none';
+    iframe.style.display = 'block';
+    const blob = new Blob([code], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    iframe.src = url;
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+
+  function refreshPreview() { runCode(); }
+
+  function hidePreview() {
+    emptyState.style.display = 'flex';
+    iframe.style.display = 'none';
+  }
+
+  function onCodeEdit() {
+    currentCode = editor.textContent;
+    charCount.textContent = currentCode.length + ' chars';
+  }
+
+  function copyCode() {
+    const code = editor.textContent;
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      setStatus('Copied!', 'done');
+      setTimeout(() => setStatus('Ready'), 1500);
+    });
+  }
+
+  function downloadCode() {
+    const code = editor.textContent;
+    if (!code.trim()) { setStatus('Nothing to download', 'err'); return; }
+
+    const prompt = promptEl.value.trim();
+    let name = prompt.slice(0, 30).replace(/[^a-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '-').toLowerCase();
+    name = name || 'app';
+
+    const blob = new Blob([code], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name + '.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setStatus('Downloaded as ' + name + '.html', 'done');
+    setTimeout(() => setStatus('Ready'), 2500);
+  }
+
+  function openInTab() {
+    const code = editor.textContent;
+    if (!code.trim()) return;
+    const blob = new Blob([code], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  }
+
+  // Resizer drag
+  const resizer = document.getElementById('resizer');
+  const editorPanel = document.getElementById('editor-panel');
+  let dragging = false, startX = 0, startW = 0;
+
+  resizer.addEventListener('mousedown', e => {
+    dragging = true; startX = e.clientX;
+    startW = editorPanel.offsetWidth;
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'col-resize';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    const total = document.getElementById('workspace').offsetWidth;
+    const newW = Math.min(Math.max(startW + dx, 200), total - 200);
+    editorPanel.style.width = newW + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
+  });
+
+  // Tab key in editor
+  editor.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      document.execCommand('insertText', false, '  ');
+    }
+  });
+</script>
+</body>
+</html>
