@@ -13,425 +13,177 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    :root {
-      --bg: #f7f7f5;
-      --surface: #ffffff;
-      --surface2: #f0ede8;
-      --border: #e5e1da;
-      --border2: #d4cfc7;
-      --text: #1a1a18;
-      --text2: #5c5a56;
-      --text3: #9b9891;
-      --accent: #cc785c;
-      --accent-bg: #fdf3ee;
-      --accent-hover: #b8673f;
-      --user-bubble: #f0ede8;
-      --sidebar-w: 260px;
-      --radius: 12px;
-      --radius-sm: 8px;
-      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    :root{
+      --bg:#f7f7f5;--surface:#ffffff;--surface2:#f0ede8;
+      --border:#e5e1da;--border2:#d4cfc7;
+      --text:#1a1a18;--text2:#5c5a56;--text3:#9b9891;
+      --accent:#cc785c;--accent-bg:#fdf3ee;--accent-hover:#b8673f;
+      --radius:12px;--radius-sm:8px;
+      --font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --font-mono:'SF Mono','Fira Code','Cascadia Code',monospace;
     }
-    html.dark {
-      --bg: #1a1917;
-      --surface: #222120;
-      --surface2: #2a2927;
-      --border: #333230;
-      --border2: #444340;
-      --text: #f0ede8;
-      --text2: #a8a49e;
-      --text3: #6b6863;
-      --accent: #cc785c;
-      --accent-bg: #2d1f18;
-      --accent-hover: #d98b70;
-      --user-bubble: #2a2927;
+    html.dark{
+      --bg:#1a1917;--surface:#222120;--surface2:#2a2927;
+      --border:#333230;--border2:#444340;
+      --text:#f0ede8;--text2:#a8a49e;--text3:#6b6863;
+      --accent:#cc785c;--accent-bg:#2d1f18;--accent-hover:#d98b70;
     }
     html,body,#root{height:100%;font-family:var(--font);}
     body{background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
     button{cursor:pointer;border:none;background:none;font:inherit;color:inherit;}
     input,textarea{font:inherit;color:var(--text);}
+    *{outline:none !important;-webkit-tap-highlight-color:transparent;}
     ::-webkit-scrollbar{width:5px;height:5px;}
     ::-webkit-scrollbar-track{background:transparent;}
     ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
-    * { outline: none !important; -webkit-tap-highlight-color: transparent; }
 
-    /* Layout */
+    /* ── Layout ── */
     .app{display:flex;height:100vh;overflow:hidden;}
-    .sidebar{
-      width:var(--sidebar-w);flex-shrink:0;
-      background:var(--surface);
-      border-right:1px solid var(--border);
-      display:flex;flex-direction:column;
-      transition:transform .2s ease;
-      position:relative;z-index:40;
-    }
+    .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:transform .2s ease;position:relative;z-index:40;}
     .sidebar.closed{transform:translateX(-100%);position:absolute;inset-y:0;left:0;}
     .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
     .chat-wrap{display:flex;flex:1;overflow:hidden;}
     .chat-col{display:flex;flex-direction:column;flex:1;min-width:0;overflow:hidden;}
 
-    /* Sidebar */
-    .sidebar-head{
-      padding:16px 12px 12px;
-      display:flex;align-items:center;justify-content:space-between;
-    }
+    /* ── Sidebar ── */
+    .sidebar-head{padding:16px 12px 12px;display:flex;align-items:center;justify-content:space-between;}
     .logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;color:var(--text);}
-    .logo-icon{
-      width:28px;height:28px;border-radius:8px;
-      background:var(--accent);display:flex;align-items:center;justify-content:center;
-    }
+    .logo-icon{width:28px;height:28px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;}
     .logo-icon svg{color:#fff;}
-    .icon-btn{
-      width:32px;height:32px;border-radius:var(--radius-sm);
-      display:flex;align-items:center;justify-content:center;
-      color:var(--text2);transition:background .15s;
-    }
+    .icon-btn{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--text2);transition:background .15s;}
     .icon-btn:hover{background:var(--surface2);}
-    .new-chat-btn{
-      margin:0 12px 10px;
-      display:flex;align-items:center;gap:8px;
-      padding:8px 12px;border-radius:var(--radius-sm);
-      font-size:13px;font-weight:500;
-      color:var(--text2);
-      border:1px solid var(--border);
-      transition:all .15s;
-      width:calc(100% - 24px);
-    }
+    .new-chat-btn{margin:0 12px 10px;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--text2);border:1px solid var(--border);transition:all .15s;width:calc(100% - 24px);}
     .new-chat-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--border2);}
     .search-wrap{padding:0 12px 8px;position:relative;}
     .search-wrap svg{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:var(--text3);}
-    .search-input{
-      width:100%;padding:7px 10px 7px 32px;
-      border-radius:var(--radius-sm);border:1px solid var(--border);
-      background:var(--surface2);font-size:13px;
-      color:var(--text);transition:border .15s;
-    }
-    .search-input:focus{border-color:var(--border2);}
+    .search-input{width:100%;padding:7px 10px 7px 32px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);font-size:13px;color:var(--text);}
     .search-input::placeholder{color:var(--text3);}
     .convo-list{flex:1;overflow-y:auto;padding:0 6px;}
-    .group-label{
-      padding:10px 8px 4px;
-      font-size:11px;font-weight:600;
-      color:var(--text3);text-transform:uppercase;letter-spacing:.06em;
-    }
-    .convo-item{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:8px 10px;border-radius:var(--radius-sm);
-      cursor:pointer;gap:6px;
-      font-size:13px;color:var(--text2);
-      transition:background .12s;
-      width:100%;text-align:left;
-    }
-    .convo-item:hover{background:var(--surface2);color:var(--text);}
-    .convo-item.active{background:var(--surface2);color:var(--text);}
+    .group-label{padding:10px 8px 4px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+    .convo-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;gap:6px;font-size:13px;color:var(--text2);transition:background .12s;width:100%;text-align:left;}
+    .convo-item:hover,.convo-item.active{background:var(--surface2);color:var(--text);}
     .convo-title{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
     .convo-time{font-size:11px;color:var(--text3);flex-shrink:0;}
     .convo-del{opacity:0;color:var(--text3);transition:opacity .12s;flex-shrink:0;padding:2px;border-radius:4px;}
     .convo-del:hover{color:#e53e3e;background:rgba(229,62,62,.1);}
     .convo-item:hover .convo-del{opacity:1;}
-    .sidebar-foot{
-      border-top:1px solid var(--border);
-      padding:10px 6px;display:flex;flex-direction:column;gap:2px;
-    }
-    .foot-btn{
-      display:flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:var(--radius-sm);
-      font-size:13px;color:var(--text2);
-      transition:background .12s;width:100%;text-align:left;
-    }
+    .sidebar-foot{border-top:1px solid var(--border);padding:10px 6px;display:flex;flex-direction:column;gap:2px;}
+    .foot-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);font-size:13px;color:var(--text2);transition:background .12s;width:100%;text-align:left;}
     .foot-btn:hover{background:var(--surface2);color:var(--text);}
 
-    /* Header */
-    .topbar{
-      height:52px;display:flex;align-items:center;justify-content:space-between;
-      padding:0 16px;
-      border-bottom:1px solid var(--border);
-      background:var(--surface);flex-shrink:0;
-    }
+    /* ── Topbar ── */
+    .topbar{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
     .topbar-left{display:flex;align-items:center;gap:10px;}
-    .topbar-title{font-size:14px;font-weight:500;color:var(--text2);}
-    .model-btn{
-      display:flex;align-items:center;gap:6px;
-      padding:5px 10px;border-radius:var(--radius-sm);
-      font-size:13px;font-weight:500;
-      border:1px solid var(--border);
-      background:var(--surface);
-      color:var(--text);transition:all .15s;
-    }
-    .model-btn:hover{border-color:var(--border2);background:var(--surface2);}
+    .topbar-title{font-size:14px;font-weight:500;color:var(--text2);max-width:36%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
     .topbar-right{display:flex;align-items:center;gap:4px;}
-
-    /* Model dropdown */
-    .model-dropdown{
-      position:absolute;left:0;top:calc(100% + 6px);z-index:100;
-      width:340px;
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow:0 8px 32px rgba(0,0,0,.12);
-      overflow:hidden;
-    }
-    .model-search{
-      padding:10px;border-bottom:1px solid var(--border);position:relative;
-    }
+    .model-btn{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:all .15s;}
+    .model-btn:hover{border-color:var(--border2);background:var(--surface2);}
+    .model-dropdown{position:absolute;left:0;top:calc(100% + 6px);z-index:100;width:340px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 32px rgba(0,0,0,.12);overflow:hidden;}
+    .model-search{padding:10px;border-bottom:1px solid var(--border);position:relative;}
     .model-search svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--text3);}
-    .model-search input{
-      width:100%;padding:7px 10px 7px 30px;
-      border-radius:var(--radius-sm);border:1px solid var(--border);
-      background:var(--surface2);font-size:13px;color:var(--text);
-    }
+    .model-search input{width:100%;padding:7px 10px 7px 30px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);font-size:13px;color:var(--text);}
     .model-search input::placeholder{color:var(--text3);}
     .model-list{max-height:280px;overflow-y:auto;padding:6px;}
     .model-provider{padding:8px 8px 4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);}
-    .model-item{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:8px 10px;border-radius:var(--radius-sm);
-      cursor:pointer;transition:background .12s;
-    }
+    .model-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .12s;}
     .model-item:hover{background:var(--surface2);}
     .model-item.active{background:var(--accent-bg);}
     .model-name{font-size:13px;font-weight:500;color:var(--text);}
     .model-ctx{font-size:11px;color:var(--text3);}
 
-    /* Messages */
+    /* ── Messages ── */
     .messages{flex:1;overflow-y:auto;padding-bottom:16px;}
-    .empty-state{
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      height:100%;text-align:center;padding:40px 24px;
-    }
-    .empty-icon{
-      width:52px;height:52px;border-radius:14px;
-      background:var(--accent);display:flex;align-items:center;justify-content:center;
-      margin-bottom:20px;
-    }
+    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px 24px;}
+    .empty-icon{width:52px;height:52px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
     .empty-icon svg{color:#fff;width:24px;height:24px;}
     .empty-title{font-size:22px;font-weight:600;margin-bottom:8px;color:var(--text);}
     .empty-sub{font-size:14px;color:var(--text2);max-width:380px;line-height:1.6;}
     .prompts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:24px;}
-    .prompt-chip{
-      padding:7px 14px;border-radius:99px;
-      border:1px solid var(--border);background:var(--surface);
-      font-size:13px;color:var(--text2);transition:all .15s;
-    }
+    .prompt-chip{padding:7px 14px;border-radius:99px;border:1px solid var(--border);background:var(--surface);font-size:13px;color:var(--text2);transition:all .15s;}
     .prompt-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
-
-    .msg-row{
-      display:flex;gap:12px;
-      padding:18px 24px;
-      transition:background .15s;
-    }
+    .msg-row{display:flex;gap:12px;padding:18px 24px;transition:background .15s;}
     .msg-row:hover{background:rgba(0,0,0,.015);}
     html.dark .msg-row:hover{background:rgba(255,255,255,.015);}
-    .msg-row.user{background:transparent;}
-    .msg-avatar{
-      width:30px;height:30px;border-radius:50%;flex-shrink:0;
-      display:flex;align-items:center;justify-content:center;
-      font-size:12px;font-weight:600;margin-top:1px;
-    }
+    .msg-avatar{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;margin-top:1px;}
     .msg-avatar.ai{background:var(--accent);color:#fff;}
     .msg-avatar.user{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
     .msg-body{flex:1;min-width:0;}
     .msg-name{font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text);}
     .msg-text{font-size:14px;line-height:1.65;color:var(--text);}
-    .msg-text p{margin-bottom:10px;}
-    .msg-text p:last-child{margin-bottom:0;}
+    .msg-text p{margin-bottom:10px;} .msg-text p:last-child{margin-bottom:0;}
     .msg-text ul,.msg-text ol{padding-left:20px;margin-bottom:10px;}
     .msg-text li{margin-bottom:4px;}
     .msg-text h1,.msg-text h2,.msg-text h3{font-weight:600;margin:14px 0 6px;}
     .msg-text h1{font-size:18px;} .msg-text h2{font-size:16px;} .msg-text h3{font-size:15px;}
-    .msg-text code:not(.hljs){
-      background:var(--surface2);border:1px solid var(--border);
-      padding:1px 5px;border-radius:4px;font-family:var(--font-mono);font-size:12px;
-    }
+    .msg-text code:not(.hljs){background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:4px;font-family:var(--font-mono);font-size:12px;}
     .msg-text a{color:var(--accent);text-decoration:underline;text-decoration-color:transparent;}
     .msg-text a:hover{text-decoration-color:var(--accent);}
     .msg-text strong{font-weight:600;}
-    .msg-actions{
-      display:flex;gap:2px;margin-top:8px;opacity:0;transition:opacity .15s;
-    }
+    .msg-actions{display:flex;gap:2px;margin-top:8px;opacity:0;transition:opacity .15s;}
     .msg-row:hover .msg-actions{opacity:1;}
-    .action-btn{
-      width:28px;height:28px;border-radius:6px;
-      display:flex;align-items:center;justify-content:center;
-      color:var(--text3);transition:all .12s;
-    }
+    .action-btn{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:all .12s;}
     .action-btn:hover{background:var(--surface2);color:var(--text);}
     .action-btn.danger:hover{background:rgba(229,62,62,.1);color:#e53e3e;}
-    .thinking{
-      display:flex;align-items:center;gap:8px;
-      font-size:13px;color:var(--text3);font-style:italic;
-    }
-    .spinner{
-      width:14px;height:14px;border-radius:50%;
-      border:2px solid var(--border);border-top-color:var(--accent);
-      animation:spin .8s linear infinite;flex-shrink:0;
-    }
+    .thinking{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);font-style:italic;}
+    .spinner{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--accent);animation:spin .8s linear infinite;flex-shrink:0;}
     @keyframes spin{to{transform:rotate(360deg);}}
 
-    /* Artifact card — matches Claude.ai style */
-    .artifact-card{
-      display:flex;align-items:center;gap:14px;
-      margin-top:12px;padding:14px 16px;
-      border-radius:14px;border:1px solid var(--border);
-      background:var(--surface);cursor:pointer;
-      transition:border-color .15s,box-shadow .15s;
-      width:100%;max-width:420px;text-align:left;
-      box-shadow:0 1px 4px rgba(0,0,0,.04);
-    }
+    /* ── Artifact card ── */
+    .artifact-card{display:flex;align-items:center;gap:14px;margin-top:12px;padding:14px 16px;border-radius:14px;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:border-color .15s,box-shadow .15s;width:100%;max-width:420px;text-align:left;box-shadow:0 1px 4px rgba(0,0,0,.04);}
     .artifact-card:hover{border-color:var(--border2);box-shadow:0 2px 10px rgba(0,0,0,.08);}
-    .artifact-icon-box{
-      width:48px;height:48px;border-radius:10px;
-      background:var(--surface2);border:1px solid var(--border);
-      display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;
-    }
+    .artifact-icon-box{width:48px;height:48px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .artifact-icon-box svg{color:var(--text2);}
     .artifact-name{font-size:14px;font-weight:500;color:var(--text);margin-bottom:2px;}
     .artifact-meta{font-size:12px;color:var(--text3);}
 
-    /* Artifact viewer modal */
-    .art-modal{
-      position:fixed;inset:0;z-index:300;
-      background:var(--surface);
-      display:flex;flex-direction:column;
-      animation:slideUp .22s ease-out;
-    }
+    /* ── Input ── */
+    .input-wrap{padding:12px 20px 16px;background:var(--bg);flex-shrink:0;}
+    .input-box{max-width:720px;margin:0 auto;border:1px solid var(--border2);border-radius:16px;background:var(--surface);box-shadow:0 2px 12px rgba(0,0,0,.06);transition:border-color .15s,box-shadow .15s;}
+    .input-box:focus-within{border-color:var(--accent);box-shadow:0 2px 16px rgba(204,120,92,.15);}
+    .input-inner{display:flex;align-items:flex-end;padding:4px 4px 4px 14px;gap:6px;}
+    textarea.chat-input{flex:1;resize:none;border:none;background:transparent;font-size:14px;line-height:1.5;padding:9px 0;color:var(--text);max-height:180px;}
+    textarea.chat-input::placeholder{color:var(--text3);}
+    .send-btn{width:34px;height:34px;border-radius:10px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,opacity .15s;margin-bottom:2px;}
+    .send-btn:disabled{opacity:.4;cursor:not-allowed;}
+    .send-btn:not(:disabled):hover{background:var(--accent-hover);}
+    .stop-btn{width:34px;height:34px;border-radius:10px;background:var(--surface2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text);margin-bottom:2px;transition:background .15s;}
+    .stop-btn:hover{background:var(--border);}
+    .input-meta{display:flex;justify-content:space-between;padding:0 14px 8px;font-size:11px;color:var(--text3);}
+    .slash-hints{display:flex;gap:6px;flex-wrap:wrap;padding:4px 14px 0;}
+    .slash-chip{padding:4px 10px;border-radius:99px;border:1px solid var(--border);font-size:12px;color:var(--text2);background:var(--surface2);transition:all .12s;}
+    .slash-chip:hover{border-color:var(--accent);color:var(--accent);}
+
+    /* ── Artifact Modal ── */
+    .art-modal{position:fixed;inset:0;z-index:300;background:var(--surface);display:flex;flex-direction:column;animation:slideUp .22s ease-out;}
     @keyframes slideUp{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
-    .art-modal-head{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:0 16px;height:52px;
-      border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;
-    }
+    .art-modal-head{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:56px;border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;}
     .art-modal-title{display:flex;align-items:center;gap:10px;min-width:0;}
-    .art-modal-icon{
-      width:32px;height:32px;border-radius:8px;
-      background:var(--surface2);border:1px solid var(--border);
-      display:flex;align-items:center;justify-content:center;flex-shrink:0;
-    }
-    .art-modal-name{font-size:14px;font-weight:500;color:var(--text);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+    .art-modal-icon{width:34px;height:34px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .art-modal-name{font-size:14px;font-weight:600;color:var(--text);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
     .art-modal-sub{font-size:12px;color:var(--text3);}
-    .art-modal-actions{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+    .art-modal-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
     .art-modal-body{flex:1;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);}
-    .art-tab-bar{
-      display:flex;gap:0;border-bottom:1px solid var(--border);
-      background:var(--surface);flex-shrink:0;
-      padding:0 12px;
-    }
-    .art-tab{
-      padding:10px 14px;font-size:13px;color:var(--text3);
-      border-bottom:2px solid transparent;cursor:pointer;
-      transition:color .12s,border-color .12s;display:flex;align-items:center;gap:6px;
-    }
+    .art-tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;padding:0 12px;}
+    .art-tab{padding:10px 14px;font-size:13px;color:var(--text3);border-bottom:2px solid transparent;cursor:pointer;transition:color .12s,border-color .12s;display:flex;align-items:center;gap:6px;position:relative;}
     .art-tab.active{color:var(--text);border-bottom-color:var(--accent);}
     .art-iframe-wrap{flex:1;overflow:hidden;padding:16px;display:flex;justify-content:center;}
-    .art-iframe-inner{
-      border-radius:12px;overflow:hidden;
-      border:1px solid var(--border);
-      background:#fff;
-      box-shadow:0 4px 24px rgba(0,0,0,.1);
-      width:100%;max-width:900px;
-    }
+    .art-iframe-inner{border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.1);width:100%;max-width:960px;}
     .art-iframe-inner iframe{width:100%;height:100%;border:none;display:block;}
-    .art-code-wrap{flex:1;overflow:auto;padding:0;}
-    .art-code-toolbar{
-      display:flex;align-items:center;gap:6px;
-      padding:8px 14px;border-bottom:1px solid var(--border);
-      background:var(--surface);flex-shrink:0;
-    }
+    .art-code-wrap{flex:1;overflow:auto;}
     .art-console{flex:1;overflow:auto;background:#111;padding:12px;font-family:var(--font-mono);font-size:12px;color:#e0e0e0;}
     .log-line{padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);}
     .log-line.error{color:#fc8181;} .log-line.warn{color:#f6c90e;}
     .log-badge{font-size:10px;font-weight:700;margin-right:8px;opacity:.5;text-transform:uppercase;}
-    .err-badge{
-      position:absolute;top:-3px;right:-3px;min-width:15px;height:15px;
-      border-radius:99px;background:#e53e3e;color:#fff;
-      font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;
-    }
-
-    /* Input */
-    .input-wrap{
-      padding:12px 20px 16px;
-      background:var(--bg);
-      flex-shrink:0;
-    }
-    .input-box{
-      max-width:720px;margin:0 auto;
-      border:1px solid var(--border2);
-      border-radius:16px;background:var(--surface);
-      box-shadow:0 2px 12px rgba(0,0,0,.06);
-      transition:border-color .15s,box-shadow .15s;
-    }
-    .input-box:focus-within{
-      border-color:var(--accent);
-      box-shadow:0 2px 16px rgba(204,120,92,.15);
-    }
-    .input-inner{display:flex;align-items:flex-end;padding:4px 4px 4px 14px;gap:6px;}
-    textarea.chat-input{
-      flex:1;resize:none;border:none;background:transparent;
-      font-size:14px;line-height:1.5;padding:9px 0;
-      color:var(--text);max-height:180px;
-    }
-    textarea.chat-input::placeholder{color:var(--text3);}
-    .send-btn{
-      width:34px;height:34px;border-radius:10px;
-      background:var(--accent);color:#fff;
-      display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;transition:background .15s,opacity .15s;
-      margin-bottom:2px;
-    }
-    .send-btn:disabled{opacity:.4;cursor:not-allowed;}
-    .send-btn:not(:disabled):hover{background:var(--accent-hover);}
-    .stop-btn{
-      width:34px;height:34px;border-radius:10px;
-      background:var(--surface2);border:1px solid var(--border2);
-      display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;color:var(--text);margin-bottom:2px;transition:background .15s;
-    }
-    .stop-btn:hover{background:var(--border);}
-    .input-meta{
-      display:flex;justify-content:space-between;
-      padding:0 14px 8px;font-size:11px;color:var(--text3);
-    }
-
-    /* Slash hints */
-    .slash-hints{display:flex;gap:6px;flex-wrap:wrap;padding:4px 14px 0;}
-    .slash-chip{
-      padding:4px 10px;border-radius:99px;border:1px solid var(--border);
-      font-size:12px;color:var(--text2);background:var(--surface2);transition:all .12s;
-    }
-    .slash-chip:hover{border-color:var(--accent);color:var(--accent);}
-
-    /* copy/dl buttons */
-    .copy-html-btn{
-      display:flex;align-items:center;gap:5px;
-      padding:5px 12px;border-radius:var(--radius-sm);
-      font-size:12px;font-weight:500;
-      border:1px solid var(--border);
-      background:var(--surface2);color:var(--text2);
-      transition:all .15s;
-    }
+    .err-badge{position:absolute;top:-2px;right:-4px;min-width:15px;height:15px;border-radius:99px;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+    .copy-html-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--surface2);color:var(--text2);transition:all .15s;}
     .copy-html-btn:hover{border-color:var(--border2);color:var(--text);}
     .copy-html-btn.copied{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
-    .dl-btn{
-      display:flex;align-items:center;gap:5px;
-      padding:5px 12px;border-radius:var(--radius-sm);
-      font-size:12px;font-weight:500;
-      background:var(--accent);color:#fff;border:1px solid transparent;
-      transition:background .15s;
-    }
+    .dl-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;background:var(--accent);color:#fff;border:1px solid transparent;transition:background .15s;}
     .dl-btn:hover{background:var(--accent-hover);}
 
-    /* Settings modal */
-    .modal-overlay{
-      position:fixed;inset:0;z-index:200;
-      background:rgba(0,0,0,.3);backdrop-filter:blur(4px);
-      display:flex;align-items:center;justify-content:center;padding:20px;
-    }
-    .modal{
-      width:100%;max-width:420px;background:var(--surface);
-      border:1px solid var(--border);border-radius:16px;padding:24px;
-      box-shadow:0 16px 48px rgba(0,0,0,.15);
-    }
+    /* ── Settings / Modal ── */
+    .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.3);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;}
+    .modal{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:0 16px 48px rgba(0,0,0,.15);}
     .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
     .modal-title{font-size:16px;font-weight:600;}
     .modal-body{display:flex;flex-direction:column;gap:18px;}
@@ -444,48 +196,33 @@
     .density-btn{flex:1;padding:7px;text-align:center;font-size:13px;color:var(--text2);transition:background .12s;}
     .density-btn.active{background:var(--surface2);color:var(--text);font-weight:500;}
     .modal-foot{margin-top:24px;display:flex;justify-content:flex-end;}
-    .done-btn{
-      padding:8px 20px;border-radius:var(--radius-sm);
-      background:var(--accent);color:#fff;
-      font-size:13px;font-weight:500;transition:background .15s;
-    }
+    .done-btn{padding:8px 20px;border-radius:var(--radius-sm);background:var(--accent);color:#fff;font-size:13px;font-weight:500;transition:background .15s;}
     .done-btn:hover{background:var(--accent-hover);}
 
-    /* Mobile overlay */
-    .sidebar-overlay{
-      display:none;position:fixed;inset:0;z-index:30;
-      background:rgba(0,0,0,.2);
-    }
-
+    /* ── Mobile ── */
+    .sidebar-overlay{display:none;position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.2);}
     @media(max-width:768px){
       .sidebar{position:fixed;inset-y:0;left:0;z-index:50;}
       .sidebar.closed{transform:translateX(-100%);}
       .sidebar-overlay.show{display:block;}
     }
 
+    /* ── Misc ── */
     @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
     .fade-in{animation:fadeIn .18s ease-out;}
-
-    /* Edit mode */
-    .edit-area{
-      width:100%;border:1px solid var(--border);
-      border-radius:var(--radius-sm);padding:8px;
-      font-size:13px;background:var(--surface);
-      color:var(--text);resize:none;min-height:60px;
-    }
+    .edit-area{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;font-size:13px;background:var(--surface);color:var(--text);resize:none;min-height:60px;}
     .edit-row{display:flex;gap:6px;margin-top:6px;}
-    .edit-save{
-      padding:5px 12px;border-radius:var(--radius-sm);
-      background:var(--accent);color:#fff;font-size:12px;font-weight:500;
-      transition:background .15s;
-    }
+    .edit-save{padding:5px 12px;border-radius:var(--radius-sm);background:var(--accent);color:#fff;font-size:12px;font-weight:500;transition:background .15s;}
     .edit-save:hover{background:var(--accent-hover);}
-    .edit-cancel{
-      padding:5px 12px;border-radius:var(--radius-sm);
-      background:var(--surface2);border:1px solid var(--border);
-      font-size:12px;color:var(--text2);transition:background .15s;
-    }
+    .edit-cancel{padding:5px 12px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);font-size:12px;color:var(--text2);transition:background .15s;}
     .edit-cancel:hover{background:var(--border);}
+
+    /* ── Supabase sync indicator ── */
+    .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s;}
+    .sync-dot.ok{background:#4caf50;}
+    .sync-dot.err{background:#e53e3e;}
+    .sync-dot.syncing{background:var(--accent);animation:pulse .8s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
   </style>
 </head>
 <body>
@@ -493,15 +230,62 @@
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
 
-const API_KEY = "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";
-const STORE = "claudex-v1";
+// ── Config ───────────────────────────────────────────────────────────────────
+const OR_KEY  = "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";
+const SB_URL  = "https://sedwzszpgispblzudkxu.supabase.co";
+const SB_KEY  = "sb_publishable_6iVgLMcaksXvFABpayNlIg_u7t7yai2";
+const STORE   = "claudex-v2";
 
+// ── Supabase REST helpers ─────────────────────────────────────────────────────
+const sb = {
+  async req(method, path, body) {
+    const res = await fetch(SB_URL + '/rest/v1/' + path, {
+      method,
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal'
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  },
+  get: (path) => sb.req('GET', path),
+  post: (path, body) => sb.req('POST', path, body),
+  patch: (path, body) => sb.req('PATCH', path, body),
+  del: (path) => sb.req('DELETE', path),
+};
+
+// Ensure tables exist via RPC isn't available on anon, so we use upsert pattern
+// Tables needed: claudex_convos (id text PK, data jsonb, updated_at timestamptz)
+async function sbSaveConvo(convo) {
+  await sb.post('claudex_convos?on_conflict=id', {
+    id: convo.id,
+    title: convo.title,
+    data: JSON.stringify(convo),
+    updated_at: new Date().toISOString()
+  });
+}
+async function sbLoadConvos() {
+  const rows = await sb.get('claudex_convos?select=data&order=updated_at.desc&limit=200');
+  return (rows || []).map(r => {
+    try { return typeof r.data === 'string' ? JSON.parse(r.data) : r.data; } catch { return null; }
+  }).filter(Boolean);
+}
+async function sbDeleteConvo(id) {
+  await sb.del(`claudex_convos?id=eq.${id}`);
+}
+
+// ── Constants ─────────────────────────────────────────────────────────────────
 const ACCENTS = {
-  clay:   { hex: '#cc785c', label: 'Clay'   },
-  slate:  { hex: '#5a7a8a', label: 'Slate'  },
-  sage:   { hex: '#5a8a6a', label: 'Sage'   },
-  plum:   { hex: '#7a5a8a', label: 'Plum'   },
-  rose:   { hex: '#8a5a6a', label: 'Rose'   },
+  clay:  { hex:'#cc785c', label:'Clay'  },
+  slate: { hex:'#5a7a8a', label:'Slate' },
+  sage:  { hex:'#5a8a6a', label:'Sage'  },
+  plum:  { hex:'#7a5a8a', label:'Plum'  },
+  rose:  { hex:'#8a5a6a', label:'Rose'  },
 };
 
 const DEFAULT_SYSTEM = `You are ClaudeX, a helpful AI coding assistant.
@@ -514,7 +298,6 @@ When asked to build, create, or generate a website, app, or HTML file, output a 
 \`\`\`
 
 HTML must have embedded CSS and JS. Use CDNs when needed. For other code, use standard fenced blocks with language identifier.
-
 Be concise, produce working code. Briefly explain what you built, then show the file block.`;
 
 const TEMPLATES = [
@@ -527,171 +310,143 @@ const TEMPLATES = [
 ];
 
 const THINKING_LINES = [
-  'Thinking...', 'Brewing the code...', 'Turning caffeine into code...',
-  'Consulting the oracle...', 'Assembling pixels...', 'Wiring up the logic...',
+  'Thinking...','Brewing the code...','Turning caffeine into code...',
+  'Consulting the oracle...','Assembling pixels...','Wiring up the logic...',
 ];
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
-
 function timeAgo(ts) {
-  const d = (Date.now() - ts) / 1000;
-  if (d < 60) return 'Just now';
-  if (d < 3600) return Math.floor(d/60) + 'm ago';
-  if (d < 86400) return Math.floor(d/3600) + 'h ago';
-  if (d < 172800) return 'Yesterday';
+  const d=(Date.now()-ts)/1000;
+  if(d<60) return 'Just now';
+  if(d<3600) return Math.floor(d/60)+'m ago';
+  if(d<86400) return Math.floor(d/3600)+'h ago';
+  if(d<172800) return 'Yesterday';
   return new Date(ts).toLocaleDateString();
 }
-
 function groupConvos(list) {
-  const g = { Today:[], Yesterday:[], 'Last 7 days':[], Older:[] };
-  const n = Date.now();
-  list.forEach(c => {
-    const d = n - c.updatedAt;
-    if (d < 86400000) g.Today.push(c);
-    else if (d < 172800000) g.Yesterday.push(c);
-    else if (d < 604800000) g['Last 7 days'].push(c);
+  const g={Today:[],Yesterday:[],'Last 7 days':[],Older:[]},n=Date.now();
+  list.forEach(c=>{const d=n-c.updatedAt;
+    if(d<86400000) g.Today.push(c);
+    else if(d<172800000) g.Yesterday.push(c);
+    else if(d<604800000) g['Last 7 days'].push(c);
     else g.Older.push(c);
   });
   return g;
 }
-
 function extractArtifacts(text) {
-  const arts = [], seen = new Set();
-  const re = /```(?:(\w+):)?([^\n`]*)\n([\s\S]*?)```/g;
-  let m;
-  while ((m = re.exec(text)) !== null) {
-    const lang = m[1] || '', file = m[2]?.trim() || '', code = m[3].trim();
-    if (!code || seen.has(code)) continue;
-    seen.add(code);
-    const ext = file.split('.').pop()?.toLowerCase();
-    const isHtml = lang === 'html' || ext === 'html' || ext === 'htm';
-    const name = file || (isHtml ? 'index.html' : `snippet.${lang || 'txt'}`);
-    arts.push({ id: uid(), name, type: isHtml ? 'html' : (lang || 'text'), content: code, language: lang || 'text' });
+  const arts=[],seen=new Set();
+  const re=/```(?:(\w+):)?([^\n`]*)\n([\s\S]*?)```/g; let m;
+  while((m=re.exec(text))!==null){
+    const lang=m[1]||'',file=m[2]?.trim()||'',code=m[3].trim();
+    if(!code||seen.has(code)) continue; seen.add(code);
+    const ext=file.split('.').pop()?.toLowerCase();
+    const isHtml=lang==='html'||ext==='html'||ext==='htm';
+    const name=file||(isHtml?'index.html':`snippet.${lang||'txt'}`);
+    arts.push({id:uid(),name,type:isHtml?'html':(lang||'text'),content:code,language:lang||'text'});
   }
   return arts;
 }
 
+// Check if response contains a code block (for hiding streaming code)
+function hasCodeBlock(text) {
+  return /```[\s\S]*?```/.test(text);
+}
+// Strip code blocks from text for display while streaming
+function stripCodeBlocks(text) {
+  // Remove complete code blocks
+  let t = text.replace(/```(?:(\w+):)?([^\n`]*)\n([\s\S]*?)```/g, '');
+  // If there's an unclosed ``` at the end, remove from there too
+  const lastOpen = t.lastIndexOf('```');
+  if (lastOpen !== -1) t = t.slice(0, lastOpen);
+  return t.trim();
+}
+
 async function* streamChat(messages, model, signal) {
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY}`,
-      'HTTP-Referer': location.origin,
-      'X-Title': 'ClaudeX'
-    },
-    body: JSON.stringify({
-      model,
-      messages: messages.map(m => ({ role: m.role, content: m.content })),
-      stream: true
-    }),
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${OR_KEY}`,'HTTP-Referer':location.origin,'X-Title':'ClaudeX'},
+    body:JSON.stringify({model,messages:messages.map(m=>({role:m.role,content:m.content})),stream:true}),
     signal
   });
-  if (!res.ok) {
-    const t = await res.text().catch(() => '');
-    let msg = `API error ${res.status}`;
-    try { const j = JSON.parse(t); msg = j.error?.message || j.message || msg; } catch {}
-    yield { type: 'error', message: msg }; return;
-  }
-  const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '';
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      const lines = buf.split('\n'); buf = lines.pop() || '';
-      for (const line of lines) {
-        const t = line.trim();
-        if (!t.startsWith('data:')) continue;
-        const data = t.slice(5).trim();
-        if (data === '[DONE]') { yield { type: 'done' }; return; }
-        try {
-          const j = JSON.parse(data);
-          const delta = j.choices?.[0]?.delta?.content;
-          if (typeof delta === 'string') yield { type: 'delta', content: delta };
-          if (j.choices?.[0]?.finish_reason) { yield { type: 'done' }; return; }
-        } catch {}
+  if(!res.ok){const t=await res.text().catch(()=>'');let msg=`API error ${res.status}`;try{const j=JSON.parse(t);msg=j.error?.message||j.message||msg;}catch{}yield{type:'error',message:msg};return;}
+  const reader=res.body.getReader(),dec=new TextDecoder();let buf='';
+  try{
+    while(true){
+      const{done,value}=await reader.read();if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop()||'';
+      for(const line of lines){
+        const t=line.trim();if(!t.startsWith('data:'))continue;
+        const data=t.slice(5).trim();if(data==='[DONE]'){yield{type:'done'};return;}
+        try{const j=JSON.parse(data);const delta=j.choices?.[0]?.delta?.content;if(typeof delta==='string')yield{type:'delta',content:delta};if(j.choices?.[0]?.finish_reason){yield{type:'done'};return;}}catch{}
       }
     }
-  } finally { reader.releaseLock(); }
-  yield { type: 'done' };
+  }finally{reader.releaseLock();}
+  yield{type:'done'};
 }
 
 function renderMarkdown(text, onArtifact) {
-  if (!text) return '';
-  const blocks = [];
-  const noCode = text.replace(/```(?:(\w+):)?([^\n`]*)\n([\s\S]*?)```/g, (_, lang, file, code) => {
-    const idx = blocks.length;
-    const ext = file?.trim().split('.').pop()?.toLowerCase();
-    const isHtml = lang === 'html' || ext === 'html' || ext === 'htm';
-    const name = file?.trim() || (isHtml ? 'index.html' : `snippet.${lang || 'txt'}`);
-    blocks.push({ name, code: code.trim(), type: isHtml ? 'html' : (lang || 'text'), lang: lang || 'text' });
+  if(!text) return '';
+  const blocks=[];
+  const noCode=text.replace(/```(?:(\w+):)?([^\n`]*)\n([\s\S]*?)```/g,(_,lang,file,code)=>{
+    const idx=blocks.length;
+    const ext=file?.trim().split('.').pop()?.toLowerCase();
+    const isHtml=lang==='html'||ext==='html'||ext==='htm';
+    const name=file?.trim()||(isHtml?'index.html':`snippet.${lang||'txt'}`);
+    blocks.push({name,code:code.trim(),type:isHtml?'html':(lang||'text'),lang:lang||'text'});
     return `<!--BLK${idx}-->`;
   });
-  let html = DOMPurify.sanitize(marked.parse(noCode, { breaks: true }));
-  html = html.replace(/<a href=/g, '<a target="_blank" rel="noopener" href=');
-  blocks.forEach((b, i) => {
-    const ext = b.name.split('.').pop()?.toUpperCase() || b.lang?.toUpperCase() || 'TXT';
-    const typeLabel = b.type === 'html' ? 'Code · HTML' : `Code · ${ext}`;
-    const card = `<button class="artifact-card" onclick="window.__showBlock(${i})">
+  let html=DOMPurify.sanitize(marked.parse(noCode,{breaks:true}));
+  html=html.replace(/<a href=/g,'<a target="_blank" rel="noopener" href=');
+  blocks.forEach((b,i)=>{
+    const ext=b.name.split('.').pop()?.toUpperCase()||b.lang?.toUpperCase()||'TXT';
+    const typeLabel=b.type==='html'?'Code · HTML':`Code · ${ext}`;
+    const card=`<button class="artifact-card" onclick="window.__showBlock(${i})">
       <div class="artifact-icon-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
       <div><div class="artifact-name">${b.name}</div><div class="artifact-meta">${typeLabel}</div></div>
     </button>`;
-    html = html.replace(`<!--BLK${i}-->`, card);
-    window[`__blk_${i}`] = b;
+    html=html.replace(`<!--BLK${i}-->`,card);
+    window[`__blk_${i}`]=b;
   });
-  window.__showBlock = (i) => { const b = window[`__blk_${i}`]; if (b && onArtifact) onArtifact([{ id: uid(), ...b }]); };
+  window.__showBlock=(i)=>{const b=window[`__blk_${i}`];if(b&&onArtifact)onArtifact([{id:uid(),...b}]);};
   return html;
 }
 
-// --- Icons ---
-const Ic = {
-  menu:      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>,
-  plus:      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>,
-  trash:     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>,
-  send:      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>,
-  x:         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
-  settings:  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>,
-  moon:      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>,
-  sun:       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2m-7.07-14.07 1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2m-4.93 7.07-1.41-1.41M6.34 6.34 4.93 4.93"/></svg>,
-  search:    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>,
-  check:     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6 9 17l-5-5"/></svg>,
-  chevron:   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>,
-  sparkles:  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4M19 17v4M3 5h4M17 19h4"/></svg>,
-  user:      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-  file:      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>,
-  download:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>,
-  copy:      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>,
-  edit:      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>,
-  refresh:   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>,
-  eye:       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>,
-  code:      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
-  terminal:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>,
-  monitor:   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>,
-  tablet:    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></svg>,
-  phone:     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="14" height="20" x="5" y="2" rx="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></svg>,
-  export:    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>,
-  maximize:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>,
-  stop:      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>,
+// ── Icons ─────────────────────────────────────────────────────────────────────
+const Ic={
+  menu:     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>,
+  plus:     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>,
+  trash:    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>,
+  send:     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>,
+  x:        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
+  settings: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>,
+  moon:     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>,
+  sun:      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2m-7.07-14.07 1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2m-4.93 7.07-1.41-1.41M6.34 6.34 4.93 4.93"/></svg>,
+  search:   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>,
+  check:    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6 9 17l-5-5"/></svg>,
+  chevron:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>,
+  sparkles: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4M19 17v4M3 5h4M17 19h4"/></svg>,
+  user:     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+  download: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>,
+  copy:     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>,
+  edit:     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>,
+  refresh:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>,
+  eye:      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>,
+  code:     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
+  terminal: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>,
+  export:   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>,
+  stop:     <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>,
+  cloud:    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>,
 };
 
-// ─── App ───────────────────────────────────────────────────────────────────
+// ── App ───────────────────────────────────────────────────────────────────────
 function App() {
   const [mounted, setMounted] = useState(false);
   const [st, setSt] = useState(() => {
     try {
-      const s = JSON.parse(localStorage.getItem(STORE) || '{}');
-      return {
-        model: s.model || 'deepseek/deepseek-chat:free',
-        convos: s.convos || [],
-        curId: s.curId || null,
-        dark: s.dark ?? false,
-        accent: s.accent || 'clay',
-        density: s.density || 'normal',
-      };
-    } catch {
-      return { model: 'deepseek/deepseek-chat:free', convos: [], curId: null, dark: false, accent: 'clay', density: 'normal' };
-    }
+      const s=JSON.parse(localStorage.getItem(STORE)||'{}');
+      return {model:s.model||'deepseek/deepseek-chat:free',convos:s.convos||[],curId:s.curId||null,dark:s.dark??false,accent:s.accent||'clay',density:s.density||'normal'};
+    } catch { return {model:'deepseek/deepseek-chat:free',convos:[],curId:null,dark:false,accent:'clay',density:'normal'}; }
   });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -702,296 +457,264 @@ function App() {
   const [models, setModels] = useState([]);
   const [search, setSearch] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [chatW, setChatW] = useState(48);
+  const [sync, setSync] = useState('idle'); // idle | syncing | ok | err
   const abortRef = useRef(null);
   const endRef = useRef(null);
   const taRef = useRef(null);
   const scrollRef = useRef(null);
   const [atBottom, setAtBottom] = useState(true);
+  const saveTimer = useRef(null);
 
   const accent = ACCENTS[st.accent];
 
   // Apply accent CSS var
   useEffect(() => {
     document.documentElement.style.setProperty('--accent', accent.hex);
-    document.documentElement.style.setProperty('--accent-hover', shadeHex(accent.hex, -15));
-    document.documentElement.style.setProperty('--accent-bg', hexAlpha(accent.hex, st.dark ? 0.12 : 0.08));
+    const n = parseInt(accent.hex.slice(1),16);
+    const r=n>>16,g=(n>>8)&0xff,b=n&0xff;
+    const shade = (v,a) => Math.max(0,Math.min(255,v+a));
+    document.documentElement.style.setProperty('--accent-hover',`#${((shade(r,-20)<<16)|(shade(g,-20)<<8)|shade(b,-20)).toString(16).padStart(6,'0')}`);
+    document.documentElement.style.setProperty('--accent-bg',`rgba(${r},${g},${b},${st.dark?0.12:0.08})`);
   }, [st.accent, st.dark]);
 
-  function shadeHex(hex, amt) {
-    const n = parseInt(hex.slice(1),16), r = Math.max(0,Math.min(255,(n>>16)+amt)), g = Math.max(0,Math.min(255,((n>>8)&0xff)+amt)), b = Math.max(0,Math.min(255,(n&0xff)+amt));
-    return '#'+((r<<16)|(g<<8)|b).toString(16).padStart(6,'0');
-  }
-  function hexAlpha(hex, a) {
-    const n = parseInt(hex.slice(1),16), r=n>>16, g=(n>>8)&0xff, b=n&0xff;
-    return `rgba(${r},${g},${b},${a})`;
-  }
-
-  useEffect(() => { setMounted(true); }, []);
-  useEffect(() => { if (mounted) localStorage.setItem(STORE, JSON.stringify(st)); }, [st, mounted]);
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', !!st.dark);
-  }, [st.dark]);
+  useEffect(()=>{ setMounted(true); },[]);
+  useEffect(()=>{ if(mounted) localStorage.setItem(STORE,JSON.stringify(st)); },[st,mounted]);
+  useEffect(()=>{ document.documentElement.classList.toggle('dark',!!st.dark); },[st.dark]);
 
   // Auto-resize textarea
-  useEffect(() => {
-    if (taRef.current) {
-      taRef.current.style.height = 'auto';
-      taRef.current.style.height = Math.min(taRef.current.scrollHeight, 180) + 'px';
-    }
-  }, [input]);
+  useEffect(()=>{
+    if(taRef.current){taRef.current.style.height='auto';taRef.current.style.height=Math.min(taRef.current.scrollHeight,180)+'px';}
+  },[input]);
 
   // Scroll
-  useEffect(() => {
-    if (atBottom) endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [st.convos, st.curId]);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const fn = () => setAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 80);
-    el.addEventListener('scroll', fn);
-    return () => el.removeEventListener('scroll', fn);
-  }, []);
+  useEffect(()=>{ if(atBottom) endRef.current?.scrollIntoView({behavior:'smooth'}); },[st.convos,st.curId]);
+  useEffect(()=>{
+    const el=scrollRef.current;if(!el)return;
+    const fn=()=>setAtBottom(el.scrollHeight-el.scrollTop-el.clientHeight<80);
+    el.addEventListener('scroll',fn);return()=>el.removeEventListener('scroll',fn);
+  },[]);
 
   // Load models
-  useEffect(() => {
-    if (!mounted) return;
-    fetch('https://openrouter.ai/api/v1/models', { headers: { Authorization: `Bearer ${API_KEY}` } })
-      .then(r => r.json())
-      .then(d => {
-        const list = (d.data || [])
-          .filter(m => m.id.endsWith(':free') && !/(image|audio|video|embed|tts|whisper)/i.test(m.id))
-          .map(m => ({ id: m.id, name: m.name||m.id, ctx: m.context_length||0, provider: m.id.split('/')[0] }))
-          .sort((a,b) => a.name.localeCompare(b.name));
+  useEffect(()=>{
+    if(!mounted)return;
+    fetch('https://openrouter.ai/api/v1/models',{headers:{Authorization:`Bearer ${OR_KEY}`}})
+      .then(r=>r.json()).then(d=>{
+        const list=(d.data||[]).filter(m=>m.id.endsWith(':free')&&!/(image|audio|video|embed|tts|whisper)/i.test(m.id))
+          .map(m=>({id:m.id,name:m.name||m.id,ctx:m.context_length||0,provider:m.id.split('/')[0]}))
+          .sort((a,b)=>a.name.localeCompare(b.name));
         setModels(list);
-      }).catch(() => {});
-  }, [mounted]);
+      }).catch(()=>{});
+  },[mounted]);
+
+  // ── Supabase: load convos on mount ──
+  useEffect(()=>{
+    if(!mounted) return;
+    setSync('syncing');
+    sbLoadConvos().then(rows=>{
+      if(rows.length>0){
+        setSt(s=>{
+          // Merge: remote wins if newer
+          const map={};
+          s.convos.forEach(c=>map[c.id]=c);
+          rows.forEach(c=>{ if(!map[c.id]||c.updatedAt>map[c.id].updatedAt) map[c.id]=c; });
+          const merged=Object.values(map).sort((a,b)=>b.updatedAt-a.updatedAt);
+          return {...s,convos:merged,curId:s.curId||merged[0]?.id||null};
+        });
+      }
+      setSync('ok');
+    }).catch(()=>setSync('err'));
+  },[mounted]);
+
+  // ── Supabase: debounced save on convo change ──
+  useEffect(()=>{
+    if(!mounted) return;
+    if(saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current=setTimeout(()=>{
+      const cur=st.convos.find(c=>c.id===st.curId);
+      if(!cur) return;
+      setSync('syncing');
+      sbSaveConvo(cur).then(()=>setSync('ok')).catch(()=>setSync('err'));
+    },1500);
+  },[st.convos]);
 
   // Default convo
-  useEffect(() => {
-    if (mounted && st.convos.length === 0) {
-      const c = mkConvo();
-      setSt(s => ({ ...s, convos: [c], curId: c.id }));
-    }
-  }, [mounted]);
+  useEffect(()=>{
+    if(mounted&&st.convos.length===0){const c=mkConvo();setSt(s=>({...s,convos:[c],curId:c.id}));}
+  },[mounted]);
 
   function mkConvo() {
-    return { id: uid(), title: 'New chat', messages: [{ id: uid(), role: 'system', content: DEFAULT_SYSTEM }], createdAt: Date.now(), updatedAt: Date.now(), model: st.model };
+    return {id:uid(),title:'New chat',messages:[{id:uid(),role:'system',content:DEFAULT_SYSTEM}],createdAt:Date.now(),updatedAt:Date.now(),model:st.model};
   }
 
-  const cur = st.convos.find(c => c.id === st.curId);
-  const curMsgs = cur?.messages.filter(m => m.role !== 'system') || [];
+  const cur=st.convos.find(c=>c.id===st.curId);
+  const curMsgs=cur?.messages.filter(m=>m.role!=='system')||[];
 
-  function updateConvo(id, fn) {
-    setSt(s => ({ ...s, convos: s.convos.map(c => c.id === id ? fn(c) : c) }));
-  }
+  function updateConvo(id,fn){setSt(s=>({...s,convos:s.convos.map(c=>c.id===id?fn(c):c)}));}
 
-  function newChat() {
-    const c = mkConvo();
-    setSt(s => ({ ...s, convos: [c, ...s.convos], curId: c.id }));
-    setArtifacts([]); setInput(''); setSidebarOpen(false);
-  }
+  function newChat(){const c=mkConvo();setSt(s=>({...s,convos:[c,...s.convos],curId:c.id}));setArtifacts([]);setInput('');setSidebarOpen(false);}
 
-  function delChat(id, e) {
+  function delChat(id,e){
     e.stopPropagation();
-    setSt(s => {
-      const rem = s.convos.filter(c => c.id !== id);
-      if (!rem.length) { const c = mkConvo(); return { ...s, convos: [c], curId: c.id }; }
-      return { ...s, convos: rem, curId: s.curId === id ? rem[0].id : s.curId };
+    sbDeleteConvo(id).catch(()=>{});
+    setSt(s=>{
+      const rem=s.convos.filter(c=>c.id!==id);
+      if(!rem.length){const c=mkConvo();return{...s,convos:[c],curId:c.id};}
+      return{...s,convos:rem,curId:s.curId===id?rem[0].id:s.curId};
     });
   }
 
-  function delMsg(id) {
-    if (!cur) return;
-    updateConvo(cur.id, c => ({ ...c, messages: c.messages.filter(m => m.id !== id) }));
+  function delMsg(id){if(!cur)return;updateConvo(cur.id,c=>({...c,messages:c.messages.filter(m=>m.id!==id)}));}
+
+  function editMsg(id,text){
+    if(!cur)return;
+    const idx=cur.messages.findIndex(m=>m.id===id);
+    const msgs=cur.messages.slice(0,idx+1);msgs[idx]={...msgs[idx],content:text};
+    updateConvo(cur.id,c=>({...c,messages:msgs}));generate(msgs,text);
   }
 
-  function editMsg(id, text) {
-    if (!cur) return;
-    const idx = cur.messages.findIndex(m => m.id === id);
-    const msgs = cur.messages.slice(0, idx+1);
-    msgs[idx] = { ...msgs[idx], content: text };
-    updateConvo(cur.id, c => ({ ...c, messages: msgs }));
-    generate(msgs, text);
+  function regen(id){
+    if(!cur)return;
+    const idx=cur.messages.findIndex(m=>m.id===id);
+    const msgs=cur.messages.slice(0,idx);
+    updateConvo(cur.id,c=>({...c,messages:msgs}));
+    const last=[...msgs].reverse().find(m=>m.role==='user');
+    if(last)generate(msgs,last.content);
   }
 
-  function regen(id) {
-    if (!cur) return;
-    const idx = cur.messages.findIndex(m => m.id === id);
-    const msgs = cur.messages.slice(0, idx);
-    updateConvo(cur.id, c => ({ ...c, messages: msgs }));
-    const last = [...msgs].reverse().find(m => m.role === 'user');
-    if (last) generate(msgs, last.content);
-  }
-
-  async function generate(baseMessages, prompt) {
-    if (!cur) return;
-    const aMsg = { id: uid(), role: 'assistant', content: '', createdAt: Date.now() };
-    updateConvo(cur.id, c => ({
-      ...c,
-      messages: [...baseMessages, aMsg],
-      updatedAt: Date.now(),
-      title: c.title === 'New chat' ? prompt.slice(0, 42) : c.title
+  async function generate(baseMessages,prompt) {
+    if(!cur)return;
+    const aMsg={id:uid(),role:'assistant',content:'',_streaming:true,createdAt:Date.now()};
+    updateConvo(cur.id,c=>({
+      ...c,messages:[...baseMessages,aMsg],updatedAt:Date.now(),
+      title:c.title==='New chat'?prompt.slice(0,42):c.title
     }));
-    setLoading(true);
-    abortRef.current = new AbortController();
-    try {
-      let full = '';
-      for await (const chunk of streamChat(baseMessages, cur.model || st.model, abortRef.current.signal)) {
-        if (chunk.type === 'delta') {
-          full += chunk.content;
-          updateConvo(cur.id, c => ({ ...c, messages: c.messages.map(m => m.id === aMsg.id ? { ...m, content: full } : m) }));
-        } else if (chunk.type === 'error') {
-          updateConvo(cur.id, c => ({ ...c, messages: c.messages.map(m => m.id === aMsg.id ? { ...m, content: `**Error:** ${chunk.message}`, error: true } : m) }));
+    setLoading(true);abortRef.current=new AbortController();
+    try{
+      let full='';
+      for await(const chunk of streamChat(baseMessages,cur.model||st.model,abortRef.current.signal)){
+        if(chunk.type==='delta'){
+          full+=chunk.content;
+          // During streaming: show only non-code text; hide code blocks
+          const display=stripCodeBlocks(full);
+          updateConvo(cur.id,c=>({...c,messages:c.messages.map(m=>m.id===aMsg.id?{...m,content:full,_display:display,_streaming:true}:m)}));
+        } else if(chunk.type==='error'){
+          updateConvo(cur.id,c=>({...c,messages:c.messages.map(m=>m.id===aMsg.id?{...m,content:`**Error:** ${chunk.message}`,_streaming:false,error:true}:m)}));
           break;
         }
       }
-      const arts = extractArtifacts(full);
-      if (arts.length) {
-        updateConvo(cur.id, c => ({ ...c, messages: c.messages.map(m => m.id === aMsg.id ? { ...m, artifacts: arts } : m) }));
-        setArtifacts(arts);
-      }
-    } catch {}
-    finally { setLoading(false); abortRef.current = null; }
+      // Done streaming — extract artifacts, show full text, open artifact modal
+      const arts=extractArtifacts(full);
+      updateConvo(cur.id,c=>({...c,messages:c.messages.map(m=>m.id===aMsg.id?{...m,content:full,_display:null,_streaming:false,artifacts:arts.length?arts:undefined}:m)}));
+      if(arts.length) setArtifacts(arts);
+    }catch(e){
+      if(e.name!=='AbortError')
+        updateConvo(cur.id,c=>({...c,messages:c.messages.map(m=>m.id===aMsg.id?{...m,content:'**Error:** Request failed',_streaming:false,error:true}:m)}));
+    }finally{setLoading(false);abortRef.current=null;}
   }
 
-  async function send(e) {
-    e?.preventDefault();
-    if (!input.trim() || loading || !cur) return;
-    const text = input.trim();
-    setInput('');
-    if (text.startsWith('/')) {
-      handleSlash(text); return;
-    }
-    const uMsg = { id: uid(), role: 'user', content: text, createdAt: Date.now() };
-    generate([...cur.messages, uMsg], text);
+  async function send(e){
+    e?.preventDefault();if(!input.trim()||loading||!cur)return;
+    const text=input.trim();setInput('');
+    if(text.startsWith('/')){handleSlash(text);return;}
+    const uMsg={id:uid(),role:'user',content:text,createdAt:Date.now()};
+    generate([...cur.messages,uMsg],text);
   }
 
-  function handleSlash(text) {
-    const [cmd, ...rest] = text.slice(1).split(' ');
-    if (cmd === 'new') newChat();
-    else if (cmd === 'clear') updateConvo(cur.id, c => ({ ...c, messages: [c.messages[0]] }));
-    else if (cmd === 'export') exportChat();
-    else {
-      const uMsg = { id: uid(), role: 'user', content: text, createdAt: Date.now() };
-      generate([...cur.messages, uMsg], text);
-    }
+  function handleSlash(text){
+    const[cmd]=text.slice(1).split(' ');
+    if(cmd==='new')newChat();
+    else if(cmd==='clear')updateConvo(cur.id,c=>({...c,messages:[c.messages[0]]}));
+    else if(cmd==='export')exportChat();
+    else{const uMsg={id:uid(),role:'user',content:text,createdAt:Date.now()};generate([...cur.messages,uMsg],text);}
   }
 
-  function exportChat() {
-    if (!cur) return;
-    const text = cur.messages.filter(m => m.role !== 'system')
-      .map(m => `**${m.role === 'user' ? 'You' : 'ClaudeX'}**\n\n${m.content}\n\n---\n`).join('\n');
-    const a = Object.assign(document.createElement('a'), {
-      href: URL.createObjectURL(new Blob([text], { type: 'text/markdown' })),
-      download: cur.title.replace(/\s+/g, '_') + '.md'
-    });
-    a.click();
+  function exportChat(){
+    if(!cur)return;
+    const text=cur.messages.filter(m=>m.role!=='system').map(m=>`**${m.role==='user'?'You':'ClaudeX'}**\n\n${m.content}\n\n---\n`).join('\n');
+    const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([text],{type:'text/markdown'})),download:cur.title.replace(/\s+/g,'_')+'.md'});a.click();
   }
 
-  function onKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-  }
+  function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
 
-  function doResize(e) {
-    const startX = e.clientX, startW = chatW;
-    const move = ev => setChatW(Math.max(30, Math.min(72, startW + ((ev.clientX-startX)/window.innerWidth)*100)));
-    const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); };
-    document.addEventListener('mousemove', move);
-    document.addEventListener('mouseup', up);
-  }
+  const filtered=st.convos.filter(c=>c.title.toLowerCase().includes(search.toLowerCase())).sort((a,b)=>b.updatedAt-a.updatedAt);
+  const groups=groupConvos(filtered);
 
-  const filtered = st.convos.filter(c => c.title.toLowerCase().includes(search.toLowerCase())).sort((a,b) => b.updatedAt - a.updatedAt);
-  const groups = groupConvos(filtered);
-
-  if (!mounted) return <div style={{display:'flex',height:'100vh',alignItems:'center',justifyContent:'center'}}><div className="spinner"/></div>;
+  if(!mounted)return <div style={{display:'flex',height:'100vh',alignItems:'center',justifyContent:'center'}}><div className="spinner"/></div>;
 
   return (
     <div className="app">
-      {/* Sidebar overlay */}
-      <div className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)}/>
+      <div className={`sidebar-overlay ${sidebarOpen?'show':''}`} onClick={()=>setSidebarOpen(false)}/>
 
-      {/* Sidebar */}
-      <aside className={`sidebar ${sidebarOpen ? '' : 'closed'}`}>
+      {/* ── Sidebar ── */}
+      <aside className={`sidebar ${sidebarOpen?'':'closed'}`}>
         <div className="sidebar-head">
           <div className="logo">
             <div className="logo-icon">{Ic.sparkles}</div>
             ClaudeX
           </div>
-          <button className="icon-btn" onClick={() => setSidebarOpen(false)}>{Ic.x}</button>
+          <button className="icon-btn" onClick={()=>setSidebarOpen(false)}>{Ic.x}</button>
         </div>
-
-        <button className="new-chat-btn" onClick={newChat}>
-          {Ic.plus} New chat
-        </button>
-
+        <button className="new-chat-btn" onClick={newChat}>{Ic.plus} New chat</button>
         <div className="search-wrap">
           {Ic.search}
-          <input className="search-input" placeholder="Search chats…" value={search} onChange={e => setSearch(e.target.value)}/>
+          <input className="search-input" placeholder="Search chats…" value={search} onChange={e=>setSearch(e.target.value)}/>
         </div>
-
         <div className="convo-list">
-          {filtered.length === 0 ? (
-            <div style={{textAlign:'center',padding:'32px 12px',color:'var(--text3)',fontSize:'13px'}}>
-              {search ? 'No matches' : 'No chats yet'}
-            </div>
-          ) : Object.entries(groups).map(([label, items]) => items.length ? (
-            <div key={label}>
-              <div className="group-label">{label}</div>
-              {items.map(c => (
-                <button key={c.id} className={`convo-item ${st.curId === c.id ? 'active' : ''}`}
-                  onClick={() => { setSt(s => ({...s,curId:c.id})); setArtifacts([]); setSidebarOpen(false); }}>
-                  <span className="convo-title">{c.title}</span>
-                  <span className="convo-time">{timeAgo(c.updatedAt)}</span>
-                  <span className="convo-del" onClick={(e) => delChat(c.id, e)}>{Ic.trash}</span>
-                </button>
-              ))}
-            </div>
-          ) : null)}
+          {filtered.length===0
+            ? <div style={{textAlign:'center',padding:'32px 12px',color:'var(--text3)',fontSize:'13px'}}>{search?'No matches':'No chats yet'}</div>
+            : Object.entries(groups).map(([label,items])=>items.length?(
+              <div key={label}>
+                <div className="group-label">{label}</div>
+                {items.map(c=>(
+                  <button key={c.id} className={`convo-item ${st.curId===c.id?'active':''}`}
+                    onClick={()=>{setSt(s=>({...s,curId:c.id}));setArtifacts([]);setSidebarOpen(false);}}>
+                    <span className="convo-title">{c.title}</span>
+                    <span className="convo-time">{timeAgo(c.updatedAt)}</span>
+                    <span className="convo-del" onClick={e=>delChat(c.id,e)}>{Ic.trash}</span>
+                  </button>
+                ))}
+              </div>
+            ):null)}
         </div>
-
         <div className="sidebar-foot">
-          <button className="foot-btn" onClick={() => setSettingsOpen(true)}>{Ic.settings} Settings</button>
-          <button className="foot-btn" onClick={() => setSt(s => ({...s,dark:!s.dark}))}>
-            {st.dark ? Ic.sun : Ic.moon}
-            {st.dark ? 'Light mode' : 'Dark mode'}
-          </button>
+          <button className="foot-btn" onClick={()=>setSettingsOpen(true)}>{Ic.settings} Settings</button>
+          <button className="foot-btn" onClick={()=>setSt(s=>({...s,dark:!s.dark}))}>{st.dark?Ic.sun:Ic.moon}{st.dark?'Light mode':'Dark mode'}</button>
+          <div className="foot-btn" style={{gap:8,cursor:'default'}}>
+            <div className={`sync-dot ${sync}`}/>
+            <span style={{fontSize:12}}>{sync==='syncing'?'Saving…':sync==='ok'?'Synced to cloud':sync==='err'?'Sync error':'Ready'}</span>
+          </div>
         </div>
       </aside>
 
-      {/* Main */}
+      {/* ── Main ── */}
       <main className="main">
         {/* Topbar */}
         <div className="topbar">
           <div className="topbar-left">
-            <button className="icon-btn" onClick={() => setSidebarOpen(true)}>{Ic.menu}</button>
+            <button className="icon-btn" onClick={()=>setSidebarOpen(true)}>{Ic.menu}</button>
             <div style={{position:'relative'}}>
-              <button className="model-btn" onClick={() => setModelOpen(!modelOpen)}>
-                <span style={{maxWidth:'180px',overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>
-                  {models.find(m => m.id === (cur?.model||st.model))?.name || st.model}
+              <button className="model-btn" onClick={()=>setModelOpen(!modelOpen)}>
+                <span style={{maxWidth:180,overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>
+                  {models.find(m=>m.id===(cur?.model||st.model))?.name||st.model}
                 </span>
                 {Ic.chevron}
               </button>
-              {modelOpen && (
+              {modelOpen&&(
                 <div className="model-dropdown">
-                  <div className="model-search">
-                    {Ic.search}
-                    <input autoFocus placeholder="Search models…" value={modelQ} onChange={e => setModelQ(e.target.value)}/>
-                  </div>
+                  <div className="model-search">{Ic.search}<input autoFocus placeholder="Search models…" value={modelQ} onChange={e=>setModelQ(e.target.value)}/></div>
                   <div className="model-list">
-                    {(() => {
-                      const byProv = {};
-                      models.filter(m => m.name.toLowerCase().includes(modelQ.toLowerCase()) || m.id.toLowerCase().includes(modelQ.toLowerCase()))
-                        .forEach(m => { byProv[m.provider] = byProv[m.provider]||[]; byProv[m.provider].push(m); });
-                      return Object.entries(byProv).map(([prov, list]) => (
+                    {(()=>{
+                      const byP={};
+                      models.filter(m=>m.name.toLowerCase().includes(modelQ.toLowerCase())||m.id.toLowerCase().includes(modelQ.toLowerCase()))
+                        .forEach(m=>{byP[m.provider]=byP[m.provider]||[];byP[m.provider].push(m);});
+                      return Object.entries(byP).map(([prov,list])=>(
                         <div key={prov}>
                           <div className="model-provider">{prov}</div>
-                          {list.map(m => (
+                          {list.map(m=>(
                             <div key={m.id} className={`model-item ${m.id===(cur?.model||st.model)?'active':''}`}
-                              onClick={() => { setSt(s=>({...s,model:m.id})); if(cur) updateConvo(cur.id,c=>({...c,model:m.id})); setModelOpen(false); setModelQ(''); }}>
+                              onClick={()=>{setSt(s=>({...s,model:m.id}));if(cur)updateConvo(cur.id,c=>({...c,model:m.id}));setModelOpen(false);setModelQ('');}}>
                               <div><div className="model-name">{m.name}</div><div className="model-ctx">{m.ctx.toLocaleString()} tokens</div></div>
-                              {m.id===(cur?.model||st.model) && Ic.check}
+                              {m.id===(cur?.model||st.model)&&Ic.check}
                             </div>
                           ))}
                         </div>
@@ -1002,9 +725,7 @@ function App() {
               )}
             </div>
           </div>
-          <div className="topbar-title" style={{maxWidth:'36%',overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>
-            {cur?.title || 'New chat'}
-          </div>
+          <div className="topbar-title">{cur?.title||'New chat'}</div>
           <div className="topbar-right">
             <button className="icon-btn" title="Export" onClick={exportChat}>{Ic.export}</button>
             <button className="icon-btn" title="New chat" onClick={newChat}>{Ic.plus}</button>
@@ -1014,29 +735,21 @@ function App() {
         {/* Chat */}
         <div className="chat-wrap">
           <div className="chat-col">
-            {/* Messages */}
             <div className="messages" ref={scrollRef}>
-              {curMsgs.length === 0 ? (
+              {curMsgs.length===0?(
                 <div className="empty-state">
                   <div className="empty-icon">{Ic.sparkles}</div>
                   <div className="empty-title">What can I help you build?</div>
-                  <div className="empty-sub">Describe an app, page, or component. I'll generate a complete previewable HTML file.</div>
-                  <div className="prompts">
-                    {TEMPLATES.map(t => (
-                      <button key={t} className="prompt-chip" onClick={() => setInput(t)}>{t}</button>
-                    ))}
-                  </div>
-                  <div style={{marginTop:'20px',fontSize:'12px',color:'var(--text3)'}}>Try /new · /clear · /export</div>
+                  <div className="empty-sub">Describe an app, page, or component. I'll build a complete HTML file and show it as a card.</div>
+                  <div className="prompts">{TEMPLATES.map(t=><button key={t} className="prompt-chip" onClick={()=>setInput(t)}>{t}</button>)}</div>
+                  <div style={{marginTop:20,fontSize:12,color:'var(--text3)'}}>Try /new · /clear · /export</div>
                 </div>
-              ) : (
-                <div style={{paddingBottom:'8px'}}>
-                  {curMsgs.map((msg, i) => (
-                    <MsgRow
-                      key={msg.id} msg={msg} isLast={i===curMsgs.length-1}
+              ):(
+                <div style={{paddingBottom:8}}>
+                  {curMsgs.map((msg,i)=>(
+                    <MsgRow key={msg.id} msg={msg} isLast={i===curMsgs.length-1}
                       loading={loading} density={st.density}
-                      onDelete={delMsg} onEdit={editMsg} onRegen={regen}
-                      onArtifact={setArtifacts}
-                    />
+                      onDelete={delMsg} onEdit={editMsg} onRegen={regen} onArtifact={setArtifacts}/>
                   ))}
                   <div ref={endRef}/>
                 </div>
@@ -1045,28 +758,19 @@ function App() {
 
             {/* Input */}
             <div className="input-wrap">
-              <div className="input-box" style={{maxWidth:'720px',margin:'0 auto'}}>
-                {input.startsWith('/') && (
+              <div className="input-box">
+                {input.startsWith('/')&&(
                   <div className="slash-hints">
-                    {['/new','/clear','/export'].map(c => (
-                      <button key={c} className="slash-chip" onClick={() => setInput(c+' ')}>{c}</button>
-                    ))}
+                    {['/new','/clear','/export'].map(c=><button key={c} className="slash-chip" onClick={()=>setInput(c+' ')}>{c}</button>)}
                   </div>
                 )}
                 <div className="input-inner">
-                  <textarea
-                    ref={taRef} className="chat-input"
-                    placeholder="Ask me to build something…"
-                    value={input} rows={1}
-                    onChange={e => setInput(e.target.value)}
-                    onKeyDown={onKey}
-                    disabled={loading}
-                  />
-                  {loading ? (
-                    <button className="stop-btn" onClick={() => abortRef.current?.abort()}>{Ic.stop}</button>
-                  ) : (
-                    <button className="send-btn" disabled={!input.trim()} onClick={send}>{Ic.send}</button>
-                  )}
+                  <textarea ref={taRef} className="chat-input" placeholder="Ask me to build something…" value={input} rows={1}
+                    onChange={e=>setInput(e.target.value)} onKeyDown={onKey} disabled={loading}/>
+                  {loading
+                    ? <button className="stop-btn" onClick={()=>abortRef.current?.abort()}>{Ic.stop}</button>
+                    : <button className="send-btn" disabled={!input.trim()} onClick={send}>{Ic.send}</button>
+                  }
                 </div>
                 <div className="input-meta">
                   <span>{Math.ceil(input.length/4)} tokens</span>
@@ -1077,50 +781,42 @@ function App() {
           </div>
         </div>
 
-        {/* Artifact viewer — full screen modal like Claude.ai */}
-        {artifacts.length > 0 && (
-          <ArtifactModal artifacts={artifacts} onClose={() => setArtifacts([])}/>
-        )}
+        {/* Artifact modal */}
+        {artifacts.length>0&&<ArtifactModal artifacts={artifacts} onClose={()=>setArtifacts([])}/>}
       </main>
 
       {/* Settings */}
-      {settingsOpen && (
-        <div className="modal-overlay" onClick={() => setSettingsOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-head">
-              <div className="modal-title">Settings</div>
-              <button className="icon-btn" onClick={() => setSettingsOpen(false)}>{Ic.x}</button>
-            </div>
+      {settingsOpen&&(
+        <div className="modal-overlay" onClick={()=>setSettingsOpen(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-head"><div className="modal-title">Settings</div><button className="icon-btn" onClick={()=>setSettingsOpen(false)}>{Ic.x}</button></div>
             <div className="modal-body">
               <div>
                 <div className="setting-label">Accent color</div>
                 <div className="accent-dots">
-                  {Object.entries(ACCENTS).map(([key, a]) => (
+                  {Object.entries(ACCENTS).map(([key,a])=>(
                     <button key={key} className={`accent-dot ${st.accent===key?'sel':''}`}
-                      style={{background:a.hex,color:a.hex}}
-                      onClick={() => setSt(s => ({...s,accent:key}))} title={a.label}/>
+                      style={{background:a.hex,color:a.hex}} onClick={()=>setSt(s=>({...s,accent:key}))} title={a.label}/>
                   ))}
                 </div>
               </div>
               <div>
                 <div className="setting-label">Message density</div>
                 <div className="density-toggle">
-                  {['normal','compact'].map(d => (
+                  {['normal','compact'].map(d=>(
                     <button key={d} className={`density-btn ${st.density===d?'active':''}`}
-                      onClick={() => setSt(s => ({...s,density:d}))} style={{textTransform:'capitalize'}}>{d}</button>
+                      onClick={()=>setSt(s=>({...s,density:d}))} style={{textTransform:'capitalize'}}>{d}</button>
                   ))}
                 </div>
               </div>
               <div>
-                <div className="setting-label">API key</div>
-                <div style={{padding:'9px 12px',borderRadius:'var(--radius-sm)',border:'1px solid var(--border)',background:'var(--surface2)',fontSize:'13px',color:'var(--text3)'}}>
-                  ●●●●●●●●●●●●●●●● (configured)
+                <div className="setting-label">Storage</div>
+                <div style={{padding:'9px 12px',borderRadius:'var(--radius-sm)',border:'1px solid var(--border)',background:'var(--surface2)',fontSize:'13px',color:'var(--text3)',display:'flex',alignItems:'center',gap:8}}>
+                  {Ic.cloud} Synced to Supabase · {SB_URL.replace('https://','').split('.')[0]}
                 </div>
               </div>
             </div>
-            <div className="modal-foot">
-              <button className="done-btn" onClick={() => setSettingsOpen(false)}>Done</button>
-            </div>
+            <div className="modal-foot"><button className="done-btn" onClick={()=>setSettingsOpen(false)}>Done</button></div>
           </div>
         </div>
       )}
@@ -1128,69 +824,73 @@ function App() {
   );
 }
 
-// ─── Message Row ────────────────────────────────────────────────────────────
-function MsgRow({ msg, isLast, loading, density, onDelete, onEdit, onRegen, onArtifact }) {
-  const isUser = msg.role === 'user';
-  const [copied, setCopied] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [editText, setEditText] = useState(msg.content);
-  const isThinking = !isUser && !msg.content && loading && isLast;
-  const thinkLine = THINKING_LINES[Math.floor(Date.now()/2500) % THINKING_LINES.length];
+// ── Message Row ───────────────────────────────────────────────────────────────
+function MsgRow({msg,isLast,loading,density,onDelete,onEdit,onRegen,onArtifact}){
+  const isUser=msg.role==='user';
+  const [copied,setCopied]=useState(false);
+  const [editing,setEditing]=useState(false);
+  const [editText,setEditText]=useState(msg.content);
+  // While streaming: show _display (text without code); once done show full rendered
+  const isStreaming=msg._streaming;
+  const isThinking=!isUser&&!msg.content&&loading&&isLast;
+  const thinkLine=THINKING_LINES[Math.floor(Date.now()/2500)%THINKING_LINES.length];
 
-  function copy() {
-    navigator.clipboard.writeText(msg.content);
-    setCopied(true); setTimeout(() => setCopied(false), 1500);
-  }
+  function copy(){navigator.clipboard.writeText(msg.content);setCopied(true);setTimeout(()=>setCopied(false),1500);}
 
-  return (
-    <div className="msg-row fade-in" style={{padding: density==='compact' ? '10px 24px' : '18px 24px'}}>
-      <div className={`msg-avatar ${isUser?'user':'ai'}`}>
-        {isUser ? Ic.user : Ic.sparkles}
-      </div>
+  return(
+    <div className="msg-row fade-in" style={{padding:density==='compact'?'10px 24px':'18px 24px'}}>
+      <div className={`msg-avatar ${isUser?'user':'ai'}`}>{isUser?Ic.user:Ic.sparkles}</div>
       <div className="msg-body">
-        <div className="msg-name">{isUser ? 'You' : 'ClaudeX'}</div>
+        <div className="msg-name">{isUser?'You':'ClaudeX'}</div>
 
-        {isThinking ? (
-          <div className="thinking">
-            <div className="spinner"/>
-            <span>{thinkLine}</span>
-          </div>
-        ) : editing ? (
+        {isThinking?(
+          <div className="thinking"><div className="spinner"/><span>{thinkLine}</span></div>
+        ):editing?(
           <div>
-            <textarea className="edit-area" value={editText} onChange={e => setEditText(e.target.value)} rows={3}/>
+            <textarea className="edit-area" value={editText} onChange={e=>setEditText(e.target.value)} rows={3}/>
             <div className="edit-row">
-              <button className="edit-save" onClick={() => { onEdit(msg.id, editText); setEditing(false); }}>Save & Regenerate</button>
-              <button className="edit-cancel" onClick={() => setEditing(false)}>Cancel</button>
+              <button className="edit-save" onClick={()=>{onEdit(msg.id,editText);setEditing(false);}}>Save & Regenerate</button>
+              <button className="edit-cancel" onClick={()=>setEditing(false)}>Cancel</button>
             </div>
           </div>
-        ) : isUser ? (
+        ):isUser?(
           <div className="msg-text" style={{whiteSpace:'pre-wrap'}}>{msg.content}</div>
-        ) : (
-          <div className="msg-text"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content, onArtifact) }}
-          />
+        ):isStreaming?(
+          // While streaming: show non-code text + spinner if code is being written
+          <div>
+            {msg._display?(
+              <div className="msg-text" dangerouslySetInnerHTML={{__html:renderMarkdown(msg._display,onArtifact)}}/>
+            ):null}
+            <div className="thinking" style={{marginTop:msg._display?8:0}}>
+              <div className="spinner"/>
+              <span>{msg._display&&msg._display.length>0?'Writing code…':thinkLine}</span>
+            </div>
+          </div>
+        ):(
+          // Done — render full markdown with artifact cards
+          <div className="msg-text" dangerouslySetInnerHTML={{__html:renderMarkdown(msg.content,onArtifact)}}/>
         )}
 
-        {/* Artifact cards attached to message */}
-        {!editing && msg.artifacts?.map(a => (
-          <button key={a.id} className="artifact-card" onClick={() => onArtifact(msg.artifacts)}>
+        {/* Persisted artifact cards (reopenable from history) */}
+        {!editing&&!isStreaming&&msg.artifacts?.map(a=>(
+          <button key={a.id} className="artifact-card" onClick={()=>onArtifact(msg.artifacts)}>
             <div className="artifact-icon-box">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
             </div>
             <div>
               <div className="artifact-name">{a.name}</div>
-              <div className="artifact-meta">{a.type === 'html' ? 'Code · HTML' : `Code · ${a.language?.toUpperCase() || 'TXT'}`}</div>
+              <div className="artifact-meta">{a.type==='html'?'Code · HTML':`Code · ${a.language?.toUpperCase()||'TXT'}`}</div>
             </div>
           </button>
         ))}
 
         {/* Actions */}
-        {!editing && !isThinking && (
+        {!editing&&!isThinking&&!isStreaming&&(
           <div className="msg-actions">
-            <button className="action-btn" title="Copy" onClick={copy}>{copied ? Ic.check : Ic.copy}</button>
-            {isUser && <button className="action-btn" title="Edit" onClick={() => setEditing(true)}>{Ic.edit}</button>}
-            {!isUser && isLast && <button className="action-btn" title="Regenerate" onClick={() => onRegen(msg.id)}>{Ic.refresh}</button>}
-            <button className="action-btn danger" title="Delete" onClick={() => onDelete(msg.id)}>{Ic.trash}</button>
+            <button className="action-btn" title="Copy" onClick={copy}>{copied?Ic.check:Ic.copy}</button>
+            {isUser&&<button className="action-btn" title="Edit" onClick={()=>setEditing(true)}>{Ic.edit}</button>}
+            {!isUser&&isLast&&<button className="action-btn" title="Regenerate" onClick={()=>onRegen(msg.id)}>{Ic.refresh}</button>}
+            <button className="action-btn danger" title="Delete" onClick={()=>onDelete(msg.id)}>{Ic.trash}</button>
           </div>
         )}
       </div>
@@ -1198,67 +898,59 @@ function MsgRow({ msg, isLast, loading, density, onDelete, onEdit, onRegen, onAr
   );
 }
 
-// ─── Artifact Modal — full screen like Claude.ai ────────────────────────────
-function ArtifactModal({ artifacts, onClose }) {
-  const [activeId, setActiveId] = useState(artifacts[0]?.id);
-  const active = artifacts.find(a => a.id === activeId) || artifacts[0];
-  const iframeRef = useRef(null);
-  const [view, setView] = useState('preview');
-  const [logs, setLogs] = useState([]);
-  const [copied, setCopied] = useState(false);
+// ── Artifact Modal ────────────────────────────────────────────────────────────
+function ArtifactModal({artifacts,onClose}){
+  const [activeId,setActiveId]=useState(artifacts[0]?.id);
+  const active=artifacts.find(a=>a.id===activeId)||artifacts[0];
+  const iframeRef=useRef(null);
+  const [view,setView]=useState('preview');
+  const [logs,setLogs]=useState([]);
+  const [copied,setCopied]=useState(false);
+  // Store blob URL so refresh doesn't blank out
+  const blobUrlRef=useRef(null);
 
-  const ext = active?.name.split('.').pop()?.toUpperCase() || 'TXT';
-  const typeLabel = active?.type === 'html' ? 'Code · HTML' : `Code · ${ext}`;
+  const ext=active?.name.split('.').pop()?.toUpperCase()||'TXT';
+  const typeLabel=active?.type==='html'?'Code · HTML':`Code · ${ext}`;
 
-  function refresh() {
+  function buildBlobUrl(content){
+    // Revoke previous blob URL to avoid memory leaks
+    if(blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    const intercept=`<script>(function(){['log','info','warn','error'].forEach(function(l){var o=console[l];console[l]=function(){var a=Array.prototype.slice.call(arguments);window.parent.postMessage({__cx:1,level:l,msg:a.map(function(x){try{return typeof x==='object'?JSON.stringify(x):String(x);}catch(e){return String(x);}}).join(' ')},'*');o.apply(console,a);};});window.onerror=function(m,u,ln){window.parent.postMessage({__cx:1,level:'error',msg:m+(ln?' (line '+ln+')':'')},'*');return false;};})();<\/script>`;
+    const html=content.replace(/<head>/i,'<head>'+intercept);
+    const blob=new Blob([html],{type:'text/html'});
+    blobUrlRef.current=URL.createObjectURL(blob);
+    return blobUrlRef.current;
+  }
+
+  function loadIframe(){
+    if(!iframeRef.current||active?.type!=='html')return;
     setLogs([]);
-    if (iframeRef.current && active?.type === 'html') {
-      const doc = iframeRef.current.contentDocument;
-      doc.open();
-      const intercept = `<script>(function(){['log','info','warn','error'].forEach(function(l){var o=console[l];console[l]=function(){var a=Array.prototype.slice.call(arguments);window.parent.postMessage({__cx:1,level:l,msg:a.map(function(x){try{return typeof x==='object'?JSON.stringify(x):String(x);}catch(e){return String(x);}}).join(' ')},'*');o.apply(console,a);};});window.onerror=function(m,u,ln){window.parent.postMessage({__cx:1,level:'error',msg:m+(ln?' (line '+ln+')':'')},'*');return false;};})();<\/script>`;
-      doc.write(active.content.replace(/<head>/i, '<head>' + intercept));
-      doc.close();
-    }
+    iframeRef.current.src=buildBlobUrl(active.content);
   }
 
-  useEffect(refresh, [active]);
+  useEffect(()=>{ loadIframe(); },[active]);
+  // Cleanup blob URL on unmount
+  useEffect(()=>()=>{ if(blobUrlRef.current)URL.revokeObjectURL(blobUrlRef.current); },[]);
 
-  useEffect(() => {
-    function handler(e) {
-      if (e.data?.__cx) {
-        setLogs(p => [...p, { level: e.data.level, msg: e.data.msg }]);
-        if (e.data.level === 'error') setView('console');
-      }
-    }
-    window.addEventListener('message', handler);
-    return () => window.removeEventListener('message', handler);
-  }, []);
+  useEffect(()=>{
+    function handler(e){if(e.data?.__cx){setLogs(p=>[...p,{level:e.data.level,msg:e.data.msg}]);if(e.data.level==='error')setView('console');}}
+    window.addEventListener('message',handler);return()=>window.removeEventListener('message',handler);
+  },[]);
 
-  // Close on Escape
-  useEffect(() => {
-    const fn = e => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', fn);
-    return () => window.removeEventListener('keydown', fn);
-  }, []);
+  useEffect(()=>{
+    const fn=e=>{if(e.key==='Escape')onClose();};
+    window.addEventListener('keydown',fn);return()=>window.removeEventListener('keydown',fn);
+  },[]);
 
-  function copyHTML() {
-    navigator.clipboard.writeText(active.content);
-    setCopied(true); setTimeout(() => setCopied(false), 1800);
+  function copyHTML(){navigator.clipboard.writeText(active.content);setCopied(true);setTimeout(()=>setCopied(false),1800);}
+  function download(){
+    const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([active.content])),download:active.name});a.click();
   }
 
-  function download() {
-    const a = Object.assign(document.createElement('a'), {
-      href: URL.createObjectURL(new Blob([active.content])),
-      download: active.name,
-    });
-    a.click();
-  }
+  const errCount=logs.filter(l=>l.level==='error').length;
 
-  const errCount = logs.filter(l => l.level === 'error').length;
-
-  return (
+  return(
     <div className="art-modal">
-      {/* Header */}
       <div className="art-modal-head">
         <div className="art-modal-title">
           <div className="art-modal-icon">
@@ -1269,82 +961,45 @@ function ArtifactModal({ artifacts, onClose }) {
             <div className="art-modal-sub">{typeLabel}</div>
           </div>
         </div>
-
         <div className="art-modal-actions">
-          <button className={`copy-html-btn ${copied?'copied':''}`} onClick={copyHTML} style={{display:'flex',alignItems:'center',gap:5}}>
-            {copied ? Ic.check : Ic.copy}
-            {copied ? 'Copied!' : 'Copy HTML'}
-          </button>
-          <button className="dl-btn" onClick={download} style={{display:'flex',alignItems:'center',gap:5}}>
-            {Ic.download} Download
-          </button>
-          <button className="icon-btn" onClick={refresh} title="Refresh">{Ic.refresh}</button>
+          <button className={`copy-html-btn ${copied?'copied':''}`} onClick={copyHTML}>{copied?Ic.check:Ic.copy} {copied?'Copied!':'Copy HTML'}</button>
+          <button className="dl-btn" onClick={download}>{Ic.download} Download</button>
+          <button className="icon-btn" onClick={loadIframe} title="Refresh">{Ic.refresh}</button>
           <button className="icon-btn" onClick={onClose} title="Close">{Ic.x}</button>
         </div>
       </div>
 
-      {/* Tab bar */}
       <div className="art-tab-bar">
-        <button className={`art-tab ${view==='preview'?'active':''}`} onClick={() => setView('preview')}>
-          {Ic.eye} Preview
-        </button>
-        <button className={`art-tab ${view==='code'?'active':''}`} onClick={() => setView('code')}>
-          {Ic.code} Code
-        </button>
-        <button className={`art-tab ${view==='console'?'active':''}`} onClick={() => setView('console')} style={{position:'relative'}}>
+        <button className={`art-tab ${view==='preview'?'active':''}`} onClick={()=>setView('preview')}>{Ic.eye} Preview</button>
+        <button className={`art-tab ${view==='code'?'active':''}`} onClick={()=>setView('code')}>{Ic.code} Code</button>
+        <button className={`art-tab ${view==='console'?'active':''}`} onClick={()=>setView('console')} style={{position:'relative'}}>
           {Ic.terminal} Console
-          {logs.length > 0 && <span className={`err-badge ${errCount?'':''}` } style={{background: errCount ? '#e53e3e' : 'var(--text3)'}}>{logs.length}</span>}
+          {logs.length>0&&<span className="err-badge" style={{background:errCount?'#e53e3e':'var(--text3)'}}>{logs.length}</span>}
         </button>
-        {/* File tabs if multiple artifacts */}
-        {artifacts.length > 1 && (
-          <div style={{display:'flex',gap:0,marginLeft:'auto'}}>
-            {artifacts.map(a => (
-              <button key={a.id} className={`art-tab ${a.id===activeId?'active':''}`}
-                onClick={() => { setActiveId(a.id); setView('preview'); }}>
-                {a.name}
-              </button>
-            ))}
-          </div>
-        )}
+        {artifacts.length>1&&<div style={{display:'flex',marginLeft:'auto'}}>
+          {artifacts.map(a=><button key={a.id} className={`art-tab ${a.id===activeId?'active':''}`} onClick={()=>{setActiveId(a.id);setView('preview');}}>{a.name}</button>)}
+        </div>}
       </div>
 
-      {/* Body */}
       <div className="art-modal-body">
-        {view === 'preview' && (
-          <div className="art-iframe-wrap">
-            <div className="art-iframe-inner">
-              <iframe
-                ref={iframeRef}
-                title={active.name}
-                style={{width:'100%',height:'100%',border:'none',display:'block'}}
-                sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-pointer-lock"
-              />
-            </div>
+        {/* Always keep iframe mounted when in preview to avoid state loss; hide via CSS when on other tabs */}
+        <div className="art-iframe-wrap" style={{display:view==='preview'?'flex':'none'}}>
+          <div className="art-iframe-inner">
+            <iframe ref={iframeRef} title={active.name} style={{width:'100%',height:'100%',border:'none',display:'block'}}
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-pointer-lock"/>
           </div>
-        )}
+        </div>
 
-        {view === 'code' && (
+        {view==='code'&&(
           <div className="art-code-wrap">
-            <pre style={{margin:0,padding:'20px',fontFamily:'var(--font-mono)',fontSize:'13px',lineHeight:1.6,color:'var(--text)',background:'var(--surface)',minHeight:'100%'}}
-              dangerouslySetInnerHTML={{
-                __html: active.language && hljs.getLanguage(active.language)
-                  ? hljs.highlight(active.content, { language: active.language }).value
-                  : hljs.highlightAuto(active.content).value
-              }}
-            />
+            <pre style={{margin:0,padding:'20px',fontFamily:'var(--font-mono)',fontSize:13,lineHeight:1.6,color:'var(--text)',background:'var(--surface)',minHeight:'100%'}}
+              dangerouslySetInnerHTML={{__html:active.language&&hljs.getLanguage(active.language)?hljs.highlight(active.content,{language:active.language}).value:hljs.highlightAuto(active.content).value}}/>
           </div>
         )}
-
-        {view === 'console' && (
+        {view==='console'&&(
           <div className="art-console">
-            {logs.length === 0
-              ? <div style={{color:'rgba(255,255,255,.3)',paddingTop:'8px'}}>No console output yet.</div>
-              : logs.map((l, i) => (
-                <div key={i} className={`log-line ${l.level}`}>
-                  <span className="log-badge">{l.level}</span>{l.msg}
-                </div>
-              ))
-            }
+            {logs.length===0?<div style={{color:'rgba(255,255,255,.3)',paddingTop:8}}>No console output yet.</div>
+              :logs.map((l,i)=><div key={i} className={`log-line ${l.level}`}><span className="log-badge">{l.level}</span>{l.msg}</div>)}
           </div>
         )}
       </div>
